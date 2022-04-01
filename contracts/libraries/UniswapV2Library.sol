@@ -5,10 +5,24 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 
 import "./SafeMath.sol";
 
+/**
+ * @title UniswapV2 Library
+ * @dev Manages all Price Sources
+ * - Features:
+ *   # Sorts token addresses.
+ *   # Calculates the address for a pair without making any external calls via the v2 SDK.
+ *   # Given some asset amount and reserves, returns an amount of the other asset representing equivalent value.
+ *   # TODO ...  
+ * @author Uniswap Labs
+ **/
 library UniswapV2Library {
     using SafeMath for uint256;
 
-    // returns sorted token addresses, used to handle return values from pairs sorted in this order
+    /**
+     * @notice Sorts token addresses.
+     * @param tokenA First token pair address
+     * @param tokenB Second token pair address
+     */
     function sortTokens(address tokenA, address tokenB)
         internal
         pure
@@ -21,7 +35,12 @@ library UniswapV2Library {
         require(token0 != address(0), "UniswapV2Library: ZERO_ADDRESS");
     }
 
-    // calculates the CREATE2 address for a pair without making any external calls
+    /**
+     * @notice Calculates the address for a pair without making any external calls via the v2 SDK.
+     * @param factory UniswapV2 Factory address
+     * @param tokenA First token pair address
+     * @param tokenB Second token pair address
+     */
     function pairFor(
         address factory,
         address tokenA,
@@ -44,7 +63,14 @@ library UniswapV2Library {
         );
     }
 
-    // fetches and sorts the reserves for a pair
+    /**
+     * @notice Calls getReserves on the pair for the passed tokens,
+     * and returns the results sorted in the order that the parameters were passed in.
+     *
+     * @param factory UniswapV2 Factory address
+     * @param tokenA First token pair address
+     * @param tokenB Second token pair address
+     */
     function getReserves(
         address factory,
         address tokenA,
@@ -59,7 +85,14 @@ library UniswapV2Library {
             : (reserve1, reserve0);
     }
 
-    // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
+    /**
+     * @notice Given some asset amount and reserves,
+     * returns an amount of the other asset representing equivalent value.
+     *
+     * @param amountA First token amount
+     * @param reserveA First token reserve
+     * @param reserveB Second token reserve
+     */
     function quote(
         uint256 amountA,
         uint256 reserveA,
@@ -73,7 +106,15 @@ library UniswapV2Library {
         amountB = amountA.mul(reserveB) / reserveA;
     }
 
-    // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
+    /**
+     * @notice Given an input asset amount,
+     * returns the maximum output amount of the other asset
+     * (accounting for fees) given reserves.
+     *
+     * @param amountIn Input asset amount
+     * @param reserveIn Input asset reserve
+     * @param reserveOut Output asset reserve
+     */
     function getAmountOut(
         uint256 amountIn,
         uint256 reserveIn,
@@ -90,7 +131,15 @@ library UniswapV2Library {
         amountOut = numerator / denominator;
     }
 
-    // given an output amount of an asset and pair reserves, returns a required input amount of the other asset
+    /**
+     * @notice Returns the minimum input asset amount,
+     * required to buy the given output asset amount
+     * (accounting for fees) given reserves.
+     *
+     * @param amountOut TODO
+     * @param reserveIn TODO
+     * @param reserveOut TODO
+     */
     function getAmountIn(
         uint256 amountOut,
         uint256 reserveIn,
@@ -106,7 +155,15 @@ library UniswapV2Library {
         amountIn = (numerator / denominator).add(1);
     }
 
-    // performs chained getAmountOut calculations on any number of pairs
+    /**
+     * @notice Given an input asset amount and an array of token addresses,
+     * calculates all subsequent maximum output token amounts by calling getReserves
+     * for each pair of token addresses in the path in turn, and using these to call getAmountOut.
+     *
+     * @param factory UniswapV2 Factory address
+     * @param amountIn TODO
+     * @param path TODO
+     */
     function getAmountsOut(
         address factory,
         uint256 amountIn,
@@ -125,7 +182,15 @@ library UniswapV2Library {
         }
     }
 
-    // performs chained getAmountIn calculations on any number of pairs
+    /**
+     * @notice Given an output asset amount and an array of token addresses,
+     * calculates all preceding minimum input token amounts by calling getReserves for each pair of token addresses
+     * in the path in turn, and using these to call getAmountIn.
+     *
+     * @param factory UniswapV2 Factory address
+     * @param amountOut TODO
+     * @param path TODO
+     */
     function getAmountsIn(
         address factory,
         uint256 amountOut,

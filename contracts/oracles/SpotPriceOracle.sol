@@ -9,6 +9,14 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
 import "../libraries/UniswapV2Library.sol";
 
+/**
+ * @title UniswapV2 Spot Oracle
+ *  Features:
+ *   # Get spot price for any pair.
+ *   # Calculate percentage from given price.
+ *
+ * @author https://github.com/ge0rgiev
+ **/
 contract SpotPriceOracle {
     IUniswapV2Router02 router;
     IUniswapV2Factory factory;
@@ -18,10 +26,16 @@ contract SpotPriceOracle {
         factory = _factory;
     }
 
-    function getPrice(
-        address fromAsset,
-        address toAsset
-    ) external view returns (uint256 quote) {
+    /**
+     * @notice Get the exchange rate for 1 `fromAsset` = ? `toAsset`
+     * @param fromAsset the input asset
+     * @param toAsset the output asset
+     */
+    function getPrice(address fromAsset, address toAsset)
+        external
+        view
+        returns (uint256 quote)
+    {
         (uint256 reserveA, uint256 reserveB) = UniswapV2Library.getReserves(
             address(factory),
             fromAsset,
@@ -35,6 +49,11 @@ contract SpotPriceOracle {
         );
     }
 
+    /**
+     * @notice Calculate the `percentage` from `price`
+     * @param price Example: 3415308340
+     * @param percentage 100% = 1e18
+     */
     function getPriceDiscrepancyRange(uint256 price, uint256 percentage)
         external
         pure
